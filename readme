@@ -1,0 +1,115 @@
+
+java 设计模式
+
+设计模式的原则：
+    1.功能单一明确   2.对扩展开放，对修改关闭   3.变化的抽象，不变的具体
+====================================================================================================
+单例模式:单例模式单独使用一个回退栈
+    public class SingleTon{
+        //1.私有化静态成员变量，推荐使用volatile修饰读取新值,静态表明生命周期和当前应用一样
+        private volatile static SingleTon instance;
+        //2.public空构造方法
+        private SingleTon{}
+        //3.静态方法返回实例
+        public static SingleTon getInstance(){
+            if(instance==null){
+                synchronized(SingleTon.class){
+                    if(instance==null){
+                        instance=new SingleTon();
+                    }
+                }
+            }
+            return instance;
+        }
+    }
+要保证单例，需要做一下几步
+--必须防止外部可以调用构造函数进行实例化，因此构造函数必须私有化。
+--必须定义一个静态函数获得该单例
+--单例使用volatile修饰
+--使用synchronized 进行同步处理，并且双重判断是否为null，我们看到synchronized (Singleton.class)里面又进行了是否为null的判断，
+  这是因为一个线程进入了该代码，如果另一个线程在等待，这时候前一个线程创建了一个实例出来完毕后，另一个线程获得锁进入该同步代码，实例已经存在，
+  没必要再次创建，因此这个判断是否是null还是必须的。
+
+====================================================================================================
+Build模式:将一个复杂对象的构造与它的表示分离，使得同样的构建过程可以创建不同的表示
+        public class Student {
+            private int age;
+            private int height;
+            private String name;
+
+            public int getAge() {
+                return age;
+            }
+
+            public void setAge(int age) {
+                this.age = age;
+            }
+
+            public int getHeight() {
+                return height;
+            }
+
+            public void setHeight(int height) {
+                this.height = height;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+            private Student(Builder builder){
+                this.age=builder.age;
+                this.height=builder.height;
+                this.name=builder.name;
+            }
+
+            public static  class Builder{
+                private int age;
+                private int height;
+                private String name;
+
+                public Builder age(int age){
+                    this.age=age;
+                    return this;
+                }
+                public Builder height(int height){
+                    this.height=height;
+                    return this;
+                }
+                public Builder name(String name){
+                    this.name=name;
+                    return this;
+                }
+
+                public Student Build(){
+                    return new Student(this);
+                }
+            }
+        }
+各大框架中大量的运用了Builder模式。最后总结一下
+--定义一个静态内部类Builder，内部的成员变量和外部类一样
+--Builder类通过一系列的方法用于成员变量的赋值，并返回当前对象本身（this）
+--Builder类提供一个build方法或者create方法用于创建对应的外部类，该方法内部调用了外部类的一个私有构造函数，该构造函数的参数就是内部类Builder
+--外部类提供一个私有构造函数供内部类调用，在该构造函数中完成成员变量的赋值，取值为Builder对象中对应的值
+
+====================================================================================================
+观察者模式:定义对象间的一对多的依赖关系，当一个对象的状态发生改变时，所有依赖它的对象都能得到通知并更新
+观察者模式的重要组成：
+    观察者：Observer ---有时我们叫订阅者Subscriber
+    被观察者：Observable ---有时候我们叫主题Subject
+    被观察者应该暴露register(订阅) 和unregister(取消订阅)
+
+
+====================================================================================================
+原型模式:用原型实例指定创建对象的种类，并通过这些原型创建新的对象
+    一个对象需要提供给其他对象访问，而且各个调用者可能都需要修改其值时，可以考虑使用原型模式拷贝多个对象供调用者使用，即保护性拷贝。
+
+
+
+
+====================================================================================================
+策略模式:策略模式定义了一系列算法，并将每个算法封装起来而且使它们还可以相互替换。策略模式让算法独立于使用它的客户而独立变换。
+  假设我们要出去旅游，而去旅游出行的方式有很多，有步行，有坐火车，有坐飞机等等
